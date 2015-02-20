@@ -7,8 +7,8 @@ tempnam
 Php tempnam() work-alike, creates a tempfile guaranteed to be new.
 
         tempnam = require('tempnam');
-        tempnam("/tmp", "my-tempfile-", callback(err, filename) {
-            // => "/tmp/my-tempfile-a7259b"
+        tempnam("/tmp", "my-prefix-", function(err, filename) {
+            // => "/tmp/my-prefix-a7259b"
         })
 
 
