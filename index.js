@@ -1,1 +1,1 @@
-module.exports = require('./lib/tempnam.js');
+module.exports = require('./tempnam.js');

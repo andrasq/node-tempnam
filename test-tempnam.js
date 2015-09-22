@@ -4,9 +4,14 @@
  */
 
 var fs = require('fs');
-var tempnam = require('../');
+var tempnam = require('./index.js');
 
 module.exports = {
+    'should parse package.json': function(t) {
+        require('./package.json');
+        t.done();
+    },
+
     'tempnam.uniqid should return a unique id': function(t) {
         var a, b;
         a = tempnam.uniqid('x');
@@ -69,5 +74,19 @@ module.exports = {
                 t.done();
             });
         });
+    },
+
+    'synchronous mode returns filename': function(t) {
+        var filename = tempnam();
+        t.ok(typeof filename === 'string');
+        fs.unlinkSync(filename);
+        t.done();
+    },
+
+    'synchronous mode returns error object on error': function(t) {
+        var filename = tempnam("/nonesuch");
+        t.ok(filename instanceof Error);
+        t.ok(filename.message.indexOf('ENOENT') >= 0)
+        t.done();
     },
 };

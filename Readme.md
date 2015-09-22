@@ -20,7 +20,7 @@ Php tempnam() work-alike, creates a tempfile guaranteed to be new.
 
 ## Functions
 
-### tempnam( [directory], [prefix], callback(err, filename) )
+### tempnam( [directory] [,prefix] [,callback(err, filename)] )
 
 php tempnam equivalent, creates a filename that does not exist on the
 system.  Like php, it also creates the file to prevent the name from
@@ -28,8 +28,13 @@ being reused.  The default directory is process.env.TMPDIR (else /tmp),
 and the default prefix is the empty string.
 
 The tempfile is created in "wx+" O_CREAT|O_EXCL exclusive-access mode to
-guarantee that it does not already exist.  The file is closed immediately
+guarantee that it does not already exist, and with access permissions as set in
+process.umask(), e.g. 0644 -rw-r--r--.  The file is closed immediately
 thereafter.
+
+Without a callback runs synchronously, and returns the filename string else an
+error object if unable to create.  The callback, if it exists, is always the
+last argument and is a function.
 
 Tempnam() generates random filenames and retries on collision.  The more files
 in the temp directory, the more chance of name collisions.  Although up to 16
@@ -46,6 +51,6 @@ opendir/readdir/unlink loop written in C.
 - O_EXCL does not guarantee uniqueness on NFS v2 or older filesystems
 
 
-## Todo
+## Related Work
 
-- make callback optional, work in synchronous mode too
+- [tmp](https://npmjs.com/package/tmp) - complex featureful tempfile and tempdir creator

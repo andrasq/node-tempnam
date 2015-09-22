@@ -26,23 +26,27 @@ function uniqid( prefix ) {
 function tempnam( directory, prefix, callback ) {
     'use strict';
 
+    // TODO: accept an options block with
+    //   mode:, prefix: , suffix:, directory:, pattern: 'fooXXXX', etc.
+
     if (!callback) {
         if (typeof prefix === 'function') { callback = prefix; prefix = null; }
         else if (!prefix && typeof directory === 'function') { callback = directory; prefix = directory = null; }
-        // TODO: allow synchronous use: if called without a callback,
-        // return fs.openSync(pathname) or expose thrown Error
-        else throw new Error("callback required");
     }
 
     directory = directory || process.env.TMPDIR || "/tmp";
     prefix = prefix || "";
 
     var pathname = directory + "/" + uniqid(prefix);
-    fs.open(pathname, "wx+", parseInt("0666", 8), function(err, fd) {
+    var createmode = (~process.umask() & parseInt('0666', 8));
+    var attempts = 0;
+    if (callback ) fs.open(pathname, "wx+", createmode, function(err, fd) {
+        // with a callback run asynchronously
         if (!err) {
             fs.close(fd);
             return callback(null, pathname);
         }
+        // TODO: limit max recursion depth to 100
         else if (err.message.indexOf('EEXIST, ') === 0) {
             return tempnam(directory, prefix, callback);
         }
@@ -50,4 +54,19 @@ function tempnam( directory, prefix, callback ) {
             return callback(err);
         }
     });
+    else {
+        // without a callback run synchronously
+        do {
+            var fd = openSync(pathname, "wx+", createmode);
+            if (typeof fd === 'number') {
+                fs.closeSync(fd);
+                return pathname;
+            }
+        } while (fd.message.indexOf('EEXIST, ') === 0 && attempts++ < 100);
+        return fd;
+    }
+
+    function openSync(path, mode) {
+        try { return fs.openSync(path, mode); } catch (err) { return err; }
+    }
 }
