@@ -11,15 +11,19 @@
  * 2014-09-23 - AR.
  */
 
-fs = require('fs');
+'use strict';
+
+var fs = require('fs');
 
 module.exports = tempnam;
+module.exports.tempnamSync = tempnamSync;
 tempnam.uniqid = uniqid;
 
+var _zeroPad = [ "", "0", "00", "000", "0000", "00000", "000000" ];
 function uniqid( prefix ) {
     prefix = prefix || "";
     var id = prefix + Math.floor(Math.random() * 0x1000000).toString(16);
-    while (id.length < 6) id = "0" + id;
+    if (id.length < 6) id = _zeroPad[6 - id.length] + id;
     return id;
 }
 

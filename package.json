@@ -1,6 +1,6 @@
 {
   "name": "tempnam",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "create unique files like php tempnam()",
   "license": "Apache-2.0",
   "repository": {
@@ -16,7 +16,7 @@
     "node": ">=0.0.0"
   },
   "scripts": {
-    "test": "nodeunit test*"
+    "test": "qnit test*"
   },
   "keywords": [
     "Andras",
@@ -28,6 +28,6 @@
   "dependencies": {
   },
   "devDependencies": {
-    "nodeunit": "*"
+    "qnit": "*"
   }
 }
