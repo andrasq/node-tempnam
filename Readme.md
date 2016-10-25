@@ -4,7 +4,7 @@ tempnam
 
 ## Summary
 
-Php tempnam() work-alike, creates a tempfile guaranteed to be new.
+PHP tempnam() work-alike, creates a tempfile guaranteed to be new.
 
         tempnam = require('tempnam');
         tempnam("/tmp", "my-prefix-", function(err, filename) {
@@ -22,8 +22,9 @@ Php tempnam() work-alike, creates a tempfile guaranteed to be new.
 
 ### tempnam( [directory] [,prefix] [,callback(err, filename)] )
 
-php tempnam equivalent, creates a filename that does not exist on the
-system.  Like php, it also creates the file to prevent the name from
+PHP [tempnam()](http://php.net/manual/en/function.tempnam.php) equivalent,
+creates a filename that does not exist on the
+system.  Like PHP, it also creates the file to prevent the name from
 being reused.  The default directory is process.env.TMPDIR (else /tmp),
 and the default prefix is the empty string.
 
@@ -53,4 +54,4 @@ opendir/readdir/unlink loop written in C.
 
 ## Related Work
 
-- [tmp](https://npmjs.com/package/tmp) - complex featureful tempfile and tempdir creator
+- [tmp](https://npmjs.com/package/tmp) - complex "kitchen sink" tempfile and tempdir creator using crypto with automatic cleanup
