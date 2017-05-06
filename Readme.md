@@ -13,7 +13,7 @@ PHP tempnam() work-alike, creates a tempfile guaranteed to be new.
         // filename => "/tmp/my-prefix-a7259b"
     })
 
-    var filename2 = tempnamSync("/tmp", "temp-");
+    var filename2 = tempnam.tempnamSync("/tmp", "temp-");
     // filename2 => "/tmp/temp-3b7c62"
 
 
