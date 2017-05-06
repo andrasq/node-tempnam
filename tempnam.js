@@ -15,9 +15,10 @@
 
 var fs = require('fs');
 
-module.exports = tempnam;
+module.exports = function(a,b,c) { return tempnam(a,b,c) };
+module.exports.tempnam = tempnam;
 module.exports.tempnamSync = tempnamSync;
-tempnam.uniqid = uniqid;
+module.exports.uniqid = uniqid;
 
 var _zeroPad = [ "", "0", "00", "000", "0000", "00000", "000000" ];
 function uniqid( prefix ) {

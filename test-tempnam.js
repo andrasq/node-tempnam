@@ -12,6 +12,13 @@ module.exports = {
         t.done();
     },
 
+    'should export tempnam and tempnamSync': function(t) {
+        t.equal(typeof tempnam, 'function');
+        t.equal(typeof tempnam.tempnam, 'function');
+        t.equal(typeof tempnam.tempnamSync, 'function');
+        t.done();
+    },
+
     'tempnam.uniqid should return a unique id': function(t) {
         var a, b;
         a = tempnam.uniqid('x');

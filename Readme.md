@@ -8,16 +8,13 @@ tempnam
 
 PHP tempnam() work-alike, creates a tempfile guaranteed to be new.
 
-        tempnam = require('tempnam');
-        tempnam("/tmp", "my-prefix-", function(err, filename) {
-            // => "/tmp/my-prefix-a7259b"
-        })
+    var tempnam = require('tempnam');
+    tempnam.tempnam("/tmp", "my-prefix-", function(err, filename) {
+        // filename => "/tmp/my-prefix-a7259b"
+    })
 
-
-## Installation
-
-        npm install tempnam
-        npm test tempnam
+    var filename2 = tempnamSync("/tmp", "temp-");
+    // filename2 => "/tmp/temp-3b7c62"
 
 
 ## Functions
@@ -48,11 +45,27 @@ files in a single directory is unmanageable; `ls` and `echo *` do not work,
 and it takes days to just delete them all off an ext3 filesystem with an
 opendir/readdir/unlink loop written in C.
 
+### tempnamSync( [directory] [,prefix] )
+
+Same as calling `tempnam(directory, prefix)`.  It is an error to include a
+callback.  Returns the filename, or an `Error` object if unable to generate a
+unique filename.
+
+    var tempnamSync = require('tempnam').tempnamSync;
+    var filename = tempnamSync("/tmp", "my-prefix-");
+    // => "/tmp/my-prefix-a7259b"
+
 
 ## Notes
 
 - O_EXCL does not guarantee uniqueness on NFS v2 or older filesystems
 
+
+## Change Log
+
+- 1.1.0 - document tempnamSync, cap recursion at 100, fix EEXIST tests, fix filename prefix, 100% test coverage
+- 1.0.0 - run sync if no callback
+- 0.9.0 - async version
 
 ## Related Work
 
