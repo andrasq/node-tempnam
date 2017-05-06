@@ -5,7 +5,7 @@
  * This filepath is guaranteed to not be returned by another tempnam() call
  * until it is removed.  The caller must delete any unneeded files.
  *
- * Copyright (C) 2014 Andras Radics
+ * Copyright (C) 2014,2017 Andras Radics
  * Licensed under the Apache License, Version 2.0
  *
  * 2014-09-23 - AR.
@@ -22,9 +22,9 @@ tempnam.uniqid = uniqid;
 var _zeroPad = [ "", "0", "00", "000", "0000", "00000", "000000" ];
 function uniqid( prefix ) {
     prefix = prefix || "";
-    var id = prefix + Math.floor(Math.random() * 0x1000000).toString(16);
+    var id = Math.floor(Math.random() * 0x1000000).toString(16);
     if (id.length < 6) id = _zeroPad[6 - id.length] + id;
-    return id;
+    return prefix + id;
 }
 
 function tempnam( directory, prefix, callback ) {
@@ -44,20 +44,22 @@ function tempnam( directory, prefix, callback ) {
     var pathname = directory + "/" + uniqid(prefix);
     var createmode = (~process.umask() & parseInt('0666', 8));
     var attempts = 0;
-    if (callback ) fs.open(pathname, "wx+", createmode, function(err, fd) {
-        // with a callback run asynchronously
-        if (!err) {
-            fs.close(fd);
-            return callback(null, pathname);
-        }
-        // TODO: limit max recursion depth to 100
-        else if (err.message.indexOf('EEXIST, ') === 0) {
-            return tempnam(directory, prefix, callback);
-        }
-        else {
-            return callback(err);
-        }
-    });
+    if (callback) (function _retry() {
+        fs.open(pathname, "wx+", createmode, function(err, fd) {
+            // with a callback run asynchronously
+            if (!err) {
+                fs.close(fd);
+                return callback(null, pathname);
+            }
+            else if ((err.code === 'EEXIST' || err.message.indexOf('EEXIST') === 0) && attempts++ < 100) {
+                pathname = directory + "/" + uniqid(prefix);
+                setImmediate(_retry);
+            }
+            else {
+                return callback(err);
+            }
+        });
+    })();
     else {
         // without a callback run synchronously
         do {
@@ -66,11 +68,18 @@ function tempnam( directory, prefix, callback ) {
                 fs.closeSync(fd);
                 return pathname;
             }
-        } while (fd.message.indexOf('EEXIST, ') === 0 && attempts++ < 100);
+            pathname = directory + "/" + uniqid(prefix);
+        } while ((fd.code === 'EEXIST' || fd.message.indexOf('EEXIST') === 0) && attempts++ < 100);
+        // TODO: this should maybe throw, like other fs Sync functions
         return fd;
     }
 
     function openSync(path, mode) {
         try { return fs.openSync(path, mode); } catch (err) { return err; }
     }
+}
+
+function tempnamSync( directory, prefix ) {
+    if (typeof prefix === 'function' || typeof directory === 'function') throw new Error("callback not expected");
+    return tempnam(directory, prefix);
 }

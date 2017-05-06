@@ -1,10 +1,10 @@
 /**
- * Copyright (C) 2014-2015 Andras Radics
+ * Copyright (C) 2014-2017 Andras Radics
  * Licensed under the Apache License, Version 2.0
  */
 
 var fs = require('fs');
-var tempnam = require('./index.js');
+var tempnam = require('./');
 
 module.exports = {
     'should parse package.json': function(t) {
@@ -33,8 +33,9 @@ module.exports = {
         var tmpdir = __dirname + '/tmp';
         process.env.TMPDIR = tmpdir;
         try { fs.mkdirSync(__dirname + '/tmp') } catch (err) { }
-        t.expect(3);
+        t.expect(4);
         tempnam(function(err, filename) {
+            t.ifError(err);
             var index = filename.indexOf(tmpdir);
             var name = filename.slice(tmpdir.length);
             process.env.TMPDIR = oldTmpdir;
@@ -45,6 +46,18 @@ module.exports = {
             fs.rmdirSync(tmpdir);
             t.done();
         });
+    },
+
+    'creates file in /tmp if TMPDIR not set': function(t) {
+        var oldTmpdir = process.env.TMPDIR;
+        delete process.env.TMPDIR;
+        tempnam(function(err, filename) {
+            t.ifError(err);
+            process.env.TMPDIR = oldTmpdir;
+            fs.unlinkSync(filename);
+            t.equal(filename.slice(0, 5), "/tmp/");
+            t.done();
+        })
     },
 
     'creates file in the specified directory with given prefix': function(t) {
@@ -76,6 +89,26 @@ module.exports = {
         });
     },
 
+    'retries if tempnam already exists': function(t) {
+        try { fs.unlinkSync('/tmp/utest-000001') } catch (err) { }
+        try { fs.unlinkSync('/tmp/utest-000002') } catch (err) { }
+        mathRandom = Math.random;
+        values = [1, 1, 2];
+        Math.random = function() { return values.shift() / 0x1000000; }
+        tempnam("/tmp", "utest-", function(err, file1) {
+            t.ifError(err);
+            tempnam("/tmp", "utest-", function(err, file2) {
+                t.ifError(err);
+                fs.unlinkSync(file1);
+                fs.unlinkSync(file2);
+                Math.random = mathRandom;
+                t.equal(file1, '/tmp/utest-000001');
+                t.equal(file2, '/tmp/utest-000002');
+                t.done();
+            })
+        })
+    },
+
     'synchronous mode returns filename': function(t) {
         var filename = tempnam();
         t.ok(typeof filename === 'string');
@@ -89,4 +122,48 @@ module.exports = {
         t.ok(filename.message.indexOf('ENOENT') >= 0)
         t.done();
     },
+
+    'synchronous mode retries if tempnam already exists': function(t) {
+        try { fs.unlinkSync('/tmp/utest-000001') } catch (err) { }
+        try { fs.unlinkSync('/tmp/utest-000002') } catch (err) { }
+        mathRandom = Math.random;
+        values = [1, 1, 2];
+        Math.random = function() { return values.shift() / 0x1000000; }
+        var name1 = tempnam("/tmp", "utest-");
+        var name2 = tempnam("/tmp", "utest-");
+        fs.unlinkSync(name1);
+        fs.unlinkSync(name2);
+        t.equal(name1, '/tmp/utest-000001');
+        t.equal(name2, '/tmp/utest-000002');
+        t.done();
+    },
+
+    'synchronous mode return errors if unable to find an unused filename': function(t) {
+        var mathRandom = Math.random;
+        Math.random = function(){ return 1 / 0x1000000 };
+        try { fs.unlinkSync('/tmp/utest-000001') } catch (err) { }
+        var fd1 = tempnam("/tmp", "utest-");
+        var err = tempnam("/tmp", "utest-");
+        Math.random = mathRandom;
+        t.equal(err.code, 'EEXIST');
+        t.equal(err.message.indexOf('EEXIST: file already exists'), 0);
+        t.done();
+    },
+
+    'tempnamSync should return a tempnam': function(t) {
+        var filename = tempnam.tempnamSync("/tmp", "utest-");
+        t.equal(typeof filename, 'string');
+        fs.unlinkSync(filename);
+        t.done();
+    },
+
+    'tempnamSync should reject a callback': function(t) {
+        try {
+            tempnam.tempnamSync("/tmp", function(){});
+            t.fail();
+        } catch (err) {
+            t.ok(err.message.indexOf('callback') >= 0);
+            t.done();
+        }
+    }
 };
