@@ -70,7 +70,7 @@ function tempnam( directory, prefix, callback ) {
                 return pathname;
             }
             pathname = directory + "/" + uniqid(prefix);
-        } while ((fd.code === 'EEXIST' || fd.message.indexOf('EEXIST') === 0) && attempts++ < 100);
+        } while ((fd.code === 'EEXIST' || fs.message && fd.message.indexOf('EEXIST') === 0) && attempts++ < 100);
         // TODO: this should maybe throw, like other fs Sync functions
         return fd;
     }
