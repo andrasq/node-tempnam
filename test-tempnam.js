@@ -7,6 +7,12 @@ var fs = require('fs');
 var tempnam = require('./');
 
 module.exports = {
+    'setUp': function(done) {
+        // the tests assume TMPDIR is not set
+        delete process.env.TMPDIR;
+        done();
+    },
+
     'should parse package.json': function(t) {
         require('./package.json');
         t.done();
@@ -36,7 +42,6 @@ module.exports = {
     },
 
     'creates file in TMPDIR with no prefix': function(t) {
-        var oldTmpdir = process.env.TMPDIR;
         var tmpdir = __dirname + '/tmp';
         process.env.TMPDIR = tmpdir;
         try { fs.mkdirSync(__dirname + '/tmp') } catch (err) { }
@@ -45,7 +50,6 @@ module.exports = {
             t.ifError(err);
             var index = filename.indexOf(tmpdir);
             var name = filename.slice(tmpdir.length);
-            process.env.TMPDIR = oldTmpdir;
             t.ok(index === 0);
             t.equal(name[0], '/');
             t.equal(name.length, 1+6);
@@ -56,11 +60,9 @@ module.exports = {
     },
 
     'creates file in /tmp if TMPDIR not set': function(t) {
-        var oldTmpdir = process.env.TMPDIR;
         delete process.env.TMPDIR;
         tempnam(function(err, filename) {
             t.ifError(err);
-            process.env.TMPDIR = oldTmpdir;
             fs.unlinkSync(filename);
             t.equal(filename.slice(0, 5), "/tmp/");
             t.done();
@@ -118,6 +120,7 @@ module.exports = {
 
     'synchronous mode returns filename': function(t) {
         var filename = tempnam();
+        if (filename instanceof Error) t.done(filename);
         t.ok(typeof filename === 'string');
         fs.unlinkSync(filename);
         t.done();
@@ -152,8 +155,9 @@ module.exports = {
         var fd1 = tempnam("/tmp", "utest-");
         var err = tempnam("/tmp", "utest-");
         Math.random = mathRandom;
+        t.ok(err instanceof Error);
         t.equal(err.code, 'EEXIST');
-        t.equal(err.message.indexOf('EEXIST: file already exists'), 0);
+        t.equal(err.message.indexOf('EEXIST'), 0);
         t.done();
     },
 
