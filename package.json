@@ -8,25 +8,17 @@
     "url": "git://github.com/andrasq/node-tempnam"
   },
   "main": "index.js",
-  "author": {
-    "name": "Andras",
-    "url": "http://github.com/andrasq"
-  },
-  "engines": {
-    "node": ">=0.0.0"
-  },
+  "author": { "name": "Andras", "url": "http://github.com/andrasq" },
+  "engines": { "node": ">=0.0.0" },
+  "keywords": [ "Andras", "tempnam", "temp", "temporary", "file" ],
+  "readme": "see README.md in the repo",
+
   "scripts": {
     "test": "qnit test*",
     "coverage": "nyc --reporter lcov --reporter text npm run test",
     "clean": "rm -rf .nyc_output coverage"
   },
-  "keywords": [
-    "Andras",
-    "tempnam",
-    "temp",
-    "temporary",
-    "file"
-  ],
+
   "dependencies": {
   },
   "devDependencies": {
