@@ -5,7 +5,7 @@
  * This filepath is guaranteed to not be returned by another tempnam() call
  * until it is removed.  The caller must delete any unneeded files.
  *
- * Copyright (C) 2014,2017 Andras Radics
+ * Copyright (C) 2014,2017,2020 Andras Radics
  * Licensed under the Apache License, Version 2.0
  *
  * 2014-09-23 - AR.
@@ -49,7 +49,7 @@ function tempnam( directory, prefix, callback ) {
         fs.open(pathname, "wx+", createmode, function(err, fd) {
             // with a callback run asynchronously
             if (!err) {
-                fs.close(fd);
+                fs.closeSync(fd);
                 return callback(null, pathname);
             }
             else if ((err.code === 'EEXIST' || err.message.indexOf('EEXIST') === 0) && attempts++ < 100) {

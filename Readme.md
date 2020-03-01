@@ -63,6 +63,7 @@ unique filename.
 
 ## Change Log
 
+- 1.1.2 - use closeSync, new fs.close requires a callback
 - 1.1.0 - document tempnamSync, cap recursion at 100, fix EEXIST tests, fix filename prefix, 100% test coverage
 - 1.0.0 - run sync if no callback
 - 0.9.0 - async version
